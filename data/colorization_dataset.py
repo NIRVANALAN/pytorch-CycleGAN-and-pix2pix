@@ -38,7 +38,8 @@ class ColorizationDataset(BaseDataset):
         BaseDataset.__init__(self, opt)
         self.dir = os.path.join(opt.dataroot, opt.phase)
         self.AB_paths = sorted(make_dataset(self.dir, opt.max_dataset_size))
-        assert(opt.input_nc == 1 and opt.output_nc == 2 and opt.direction == 'AtoB')
+        assert(opt.input_nc == 1 and opt.output_nc ==
+               2 and opt.direction == 'AtoB')
         self.transform = get_transform(self.opt, convert=False)
 
     def __getitem__(self, index):
@@ -58,7 +59,7 @@ class ColorizationDataset(BaseDataset):
         im = self.transform(im)
         im = np.array(im)
         lab = color.rgb2lab(im).astype(np.float32)
-        lab_t = transforms.ToTensor()(lab)
+        lab_t = transforms.ToTensor()(lab)  # TODO
         A = lab_t[[0], ...] / 50.0 - 1.0
         B = lab_t[[1, 2], ...] / 110.0
         return {'A': A, 'B': B, 'A_paths': path, 'B_paths': path}
