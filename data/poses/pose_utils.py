@@ -8,7 +8,7 @@ from .colmap_wrapper import run_colmap
 from . import colmap_read_model as read_model
 
 
-def load_colmap_pose(realdir):
+def load_colmap_pose(realdir, pose=False):
     imagesfile = os.path.join(realdir, "sparse/0/images.bin")
     imdata = read_model.read_images_binary(imagesfile)
 
@@ -25,10 +25,13 @@ def load_colmap_pose(realdir):
         m = np.concatenate([np.concatenate([R, t], 1), bottom], 0)
         w2c_mats.append(m)
     w2c_mats = np.stack(w2c_mats, 0)
-    c2w_mats = np.linalg.inv(w2c_mats)
-    poses = c2w_mats[:, :3, :4]  # .transpose([1, 2, 0]) #?
+    if pose:
+        c2w_mats = np.linalg.inv(w2c_mats)
+        poses = c2w_mats[:, :3, :4]  # .transpose([1, 2, 0]) #?
+    else:
+        poses = w2c_mats[:, :3, :4]  # .transpose([1, 2, 0]) #?
     poses = poses.reshape(poses.shape[0], -1)
-    return list(zip(names, poses))
+    return list(zip(names, poses)), str(realdir)
 
 
 def load_colmap_data(realdir):

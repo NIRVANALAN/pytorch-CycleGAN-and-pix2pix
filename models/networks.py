@@ -732,6 +732,7 @@ class DCGAN_G(nn.Module): #TODO
         super(DCGAN_G, self).__init__()
         self.pe = PositionalEncoding(z_size, dropout=0.1, max_len=2000)
         # fuse PE and pose
+        # self.const_z = torch.Tensor(1, z_size).cuda() #?
         self.pose_fusion = nn.Linear(12, z_size)
 
         # = param
@@ -789,6 +790,7 @@ class DCGAN_G(nn.Module): #TODO
     def forward(self, frame, pose):
         poses_z = self.pose_fusion(pose)
         temporal_pose_z = self.pe(poses_z, frame)
+        # temporal_pose_z += self.const_z # TODO
         bs, dim = temporal_pose_z.shape[:2]
         temporal_pose_z = temporal_pose_z.view(bs, dim ,1,1)
 

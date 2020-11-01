@@ -93,7 +93,9 @@ class Open4DPoseDataset(BaseDataset):
         Step 3: convert your data to a PyTorch tensor. You can use helpder functions such as self.transform. e.g., data = self.transform(image)
         Step 4: return a data point as a dictionary.
         """
-        multi_view = load_colmap_pose(self.stereo_list[index])  # needs to be a string
+        multi_view, view_path = load_colmap_pose(
+            self.stereo_list[index]
+        )  # needs to be a string
         img_list = []
         poses_list = []
         for img, pose in multi_view:
@@ -105,7 +107,7 @@ class Open4DPoseDataset(BaseDataset):
         img_list, poses_list = [
             torch.stack(tensor_list, dim=0) for tensor_list in (img_list, poses_list)
         ]
-        return {"frame": index, "gt": img_list, "poses": poses_list}
+        return {"frame": index, "gt": img_list, "poses": poses_list, "path": view_path}
 
     def __len__(self):
         """Return the total number of images."""

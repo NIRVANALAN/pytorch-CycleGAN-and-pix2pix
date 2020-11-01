@@ -61,9 +61,11 @@ class NVSModel(BaseModel):
         BaseModel.__init__(self, opt)
         self.opt = opt
         # specify the training losses you want to print out. The training/test scripts will call <BaseModel.get_current_losses>
-        self.loss_names = ["G_GAN", "G_L1", "D_real", "D_fake"]
+        self.loss_names = ["G_GAN", "G_L1", "D_real", "D_fake"]  # "VGG_L1"]
         # specify the images you want to save/display. The training/test scripts will call <BaseModel.get_current_visuals>
         self.visual_names = ["gt", "fake"]
+        if not self.isTrain:
+            self.visual_names.extend(["f_50", "b_20"])
         # specify the models you want to save to the disk. The training/test scripts will call <BaseModel.save_networks> and <BaseModel.load_networks>
         if self.isTrain:
             self.model_names = ["G", "D"]
@@ -123,8 +125,8 @@ class NVSModel(BaseModel):
         # AtoB = self.opt.direction == 'AtoB'
         # self.real_A = input['A' if AtoB else 'B'].to(self.device)
         # self.real_B = input['B' if AtoB else 'A'].to(self.device)
-        # self.image_paths = input['A_paths' if AtoB else 'B_paths']
-        self.input = input
+        # self.input = input
+        self.image_paths = input["path"]
         self.gt = input["gt"].squeeze(0).cuda()
         self.frames = input["frame"].cuda()
         self.poses = input["poses"].squeeze(0).cuda()
@@ -133,6 +135,9 @@ class NVSModel(BaseModel):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
         # for frame, pose in tuple(zip(self.frames, self.poses)):
         self.fake = self.netG(self.frames, self.poses)  # G(A)
+        if not self.isTrain:
+            self.f_50 = self.netG(self.frames + 50, self.poses)
+            self.b_20 = self.netG(self.frames - 20, self.poses)
 
     def backward_D(self):
         """Calculate GAN loss for the discriminator"""
